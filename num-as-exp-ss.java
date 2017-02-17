@@ -1,7 +1,10 @@
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
-import java.util.*;
+
+import java.util.Scanner;
+import java.util.StringTokenizer;
 
 /* SpreadSheet implements an array of cells within a graphical
  * user interface. Each cell is represented by a JTextField that
@@ -92,9 +95,11 @@ public class SpreadSheet extends JFrame {
     // parameter keeps track of the length of the dependency chain.
     // Returns a string if value is valid, otherwise null.
     public String evaluateToken(String tok, int depth) {
-    
-    	Scanner cs = new Scanner(tok);
-    	
+    	Scanner sc = new Scanner(tok);
+		if (sc.hasNextDouble()) {
+			return tok;
+		}
+		
         if (tok.length() >= 2 && tok.charAt(0) >= 'A' && 
             tok.charAt(0) < (char) ('A' + maxCols)) {
             int col = tok.charAt(0) - 'A';
@@ -144,15 +149,53 @@ public class SpreadSheet extends JFrame {
             throws NumberFormatException {
         if (tokens.hasMoreTokens()) {
             String tok = tokens.nextToken();
-            tok = evaluateToken(tok, depth);
-            if (tok == null) return null;
+            
+            int countMinus = 0;
+            
+            while(tok.equals("-")){
+            	countMinus++;
+            	tok = tokens.nextToken();
+            }
+            
+            //even number of minus -- should be positive
+            if((countMinus%2) == 0){
+            	tok = evaluateToken(tok, depth);
+                if (tok == null) return null;
+            }
+            
+            //odd number of minus - should be negative
+            else if((countMinus%2) != 0){
+            	tok = evaluateToken(tok, depth);
+                if (tok == null) return null;
+                else tok = "-" + tok;
+            }
+
             while (tokens.hasMoreTokens()) {
                 String tok2 = tokens.nextToken();
                 if (tok2 == null) return null;
                 if (!tokens.hasMoreTokens()) return null;
                 String tok3 = tokens.nextToken();
-                tok3 = evaluateToken(tok3, depth);
-                if (tok3 == null) return null;
+                
+                int countMinustok3 = 0;
+                
+                while(tok3.equals("-")){
+                	countMinustok3++;
+                	tok3 = tokens.nextToken();
+                }
+                
+                //even number of minus -- should be positive
+                if((countMinustok3%2) == 0){
+                	tok3 = evaluateToken(tok3, depth);
+                    if (tok3 == null) return null;
+                }
+                
+                //odd number of minus - should be negative
+                else if((countMinustok3%2) != 0){
+                	tok3 = evaluateToken(tok3, depth);
+                    if (tok3 == null) return null;
+                    else tok3 = "-" + tok3;
+                }
+                
                 if (tok2.equals("+")) {
                     tok = add(tok, tok3);
                 } else if (tok2.equals("*")) {
